@@ -1,0 +1,7 @@
+.idea
+.vscode
+*.pyo
+__pycache__
+!/**/.gitkeep
+bin/*
+.DS_Store
