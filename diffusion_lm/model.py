@@ -5,20 +5,35 @@ import torch.nn.functional as F
 
 
 class Diffusion:
-    def __init__(self, noise_steps=1200, beta_start=1e-4, beta_end=0.02) -> None:
-        pass
+
+    def __init__(self, noise_steps=1200, beta_start=1e-4, beta_end=0.02, text_length=128, device='cpu') -> None:
+        self.noise_steps = noise_steps
+        self.beta_start = beta_start
+        self.beta_end = beta_end
+        self.device = device
+        self.text_length = text_length
+
+        self.beta = self.prepare_noise_schedule().to(device)
+        self.alpha = 1. - self.beta
+        self.alpha_hat = torch.cumprod(self.alpha, dim=0)
 
     def prepare_noise_schedule(self):
-        pass
+        return torch.linspace(self.beta_start, self.beta_end, self.noise_steps)
 
-    def noise_text(self):
-        pass
+    def noise_text(self, x, time_step, fixed_length=128):
+        sqrt_alpha_hat = torch.sqrt(self.alpha_hat[time_step])[:, None, None, None]
+        sqrt_one_minus_alpha_hat = torch.sqrt(1 - sqrt_alpha_hat[time_step])[:, None, None, None]
+        eps = torch.rand_like(x)
+        return sqrt_alpha_hat * x + sqrt_one_minus_alpha_hat * eps, eps
 
-    def sample_timestep(self):
-        pass
+    def sample_timestep(self, n):
+        torch.randint(low=1, high=self.noise_steps, size=(n,))
 
-    def sample(self):
-        pass
+    def sample(self, model, n):
+        model.eval()
+        with torch.no_grad():
+            pass
+
 
 
 # Layer normalization with optional bias
